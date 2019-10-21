@@ -11,22 +11,22 @@ import {
 
 export default class UICard extends React.Component {
   static propTypes = {
-    img: PropTypes.string,
+    thumbnail: PropTypes.string,
     title: PropTypes.string,
-    count: PropTypes.number,
-    link: PropTypes.string,
+    num_comments: PropTypes.number,
+    permalink: PropTypes.string,
   };
 
   render() {
-    const { img, title, count, link } = this.props;
+    const { thumbnail, title, num_comments, permalink } = this.props;
 
     return (
       <Card>
-        <CardImg top width="100%" src={img} alt="Card image cap" />
+        <CardImg top width="100%" src={thumbnail} alt="Card image cap" />
         <CardBody>
           <CardTitle>{title}</CardTitle>
-          <CardSubtitle>Numbers of comments: {count}</CardSubtitle>
-          <Badge href={link} color="light">
+          <CardSubtitle>Numbers of comments: {num_comments}</CardSubtitle>
+          <Badge href={permalink} color="light">
             Light
           </Badge>
         </CardBody>

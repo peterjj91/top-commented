@@ -1,15 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Card,
-  CardImg,
-  CardBody,
-  CardTitle,
-  CardSubtitle,
-  Badge,
-} from 'reactstrap';
+import { Card, CardImg, CardBody, CardTitle, CardSubtitle } from 'reactstrap';
+import errorImage from './../../assets/images/image-not-found.jpg';
 
-export default class UICard extends React.Component {
+export default class UICard extends React.PureComponent {
   static propTypes = {
     thumbnail: PropTypes.string,
     title: PropTypes.string,
@@ -21,14 +15,23 @@ export default class UICard extends React.Component {
     const { thumbnail, title, num_comments, permalink } = this.props;
 
     return (
-      <Card>
-        <CardImg top width="100%" src={thumbnail} alt="Card image cap" />
+      <Card className="mb-4">
+        <div className="card-img-wrapper">
+          <CardImg
+            top
+            width="100%"
+            src={thumbnail === 'self' ? errorImage : thumbnail}
+            alt="Card image cap"
+          />
+        </div>
         <CardBody>
-          <CardTitle>{title}</CardTitle>
-          <CardSubtitle>Numbers of comments: {num_comments}</CardSubtitle>
-          <Badge href={permalink} color="light">
-            Light
-          </Badge>
+          <CardTitle>
+            <strong>{title}</strong>
+          </CardTitle>
+          <CardSubtitle className="font-weight-light">
+            Numbers of comments: {num_comments}
+          </CardSubtitle>
+          <a href={permalink}>Link</a>
         </CardBody>
       </Card>
     );

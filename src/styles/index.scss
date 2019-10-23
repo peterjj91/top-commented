@@ -5,3 +5,23 @@ body {
 .container-fluid {
   max-width: 1200px;
 }
+
+.card-img-wrapper {
+  position: relative;
+  overflow: hidden;
+
+  &:before {
+    content: '';
+    padding-top: 50%;
+    display: block;
+  }
+
+  img {
+    position: absolute;
+    transform: translate(-50%, 0%);
+    top: 0;
+    left: 50%;
+    width: auto;
+    height: 100%;
+  }
+}

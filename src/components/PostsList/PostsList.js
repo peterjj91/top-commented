@@ -98,26 +98,6 @@ export default class PostsList extends React.PureComponent {
     }, 1000);
   };
 
-  timerContinue = () => {};
-
-  timerStop = interval => {
-    // if (!this.props.values.startRefreshing) {
-    //   console.log(
-    //     'click stop startRefreshing',
-    //     !this.props.values.startRefreshing
-    //   );
-    //   return clearInterval(interval);
-    // }
-    // if (this.state.values.counter === this.state.sortedPosts.length - 1) {
-    //   console.log('end');
-    //   return clearInterval(interval);
-    // }
-    // if (this.props.values.current_value === 0) {
-    //   console.log('000');
-    //   return clearInterval(interval);
-    // }
-  };
-
   timerStartCountAndShowPosts = () => {
     this.setState(prevState => ({
       values: {

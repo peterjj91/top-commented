@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Row, Col } from 'reactstrap';
 import UICard from '../UICard';
 import { API_URL } from './../../api/api';
-import _ from 'lodash';
 
 export default class PostsList extends React.PureComponent {
   constructor() {
@@ -12,7 +11,7 @@ export default class PostsList extends React.PureComponent {
     this.state = {
       initialPosts: [],
       sortedPosts: [],
-      showPosts: [],
+      showSearchPosts: [],
       values: {
         current_value: 0,
         counter: 0,
@@ -33,10 +32,6 @@ export default class PostsList extends React.PureComponent {
         return response.json();
       })
       .then(data => {
-        // const allSortingPosts = Array.from(
-        //   new Set(data.data.children.map(item => item.data.num_comments))
-        // );
-
         this.setState(() => ({
           initialPosts: this.sortPosts(data.data.children),
         }));
@@ -44,7 +39,6 @@ export default class PostsList extends React.PureComponent {
         this.props.onPostLoaded({
           target: {
             name: 'max_range',
-            // value: Math.max(...allSortingPosts),
             value: 400,
           },
         });
@@ -59,7 +53,15 @@ export default class PostsList extends React.PureComponent {
     );
   };
 
-  filterPosts = () => {
+  timer = () => {
+    this.onTimerFilterPosts();
+
+    this.timerClearStorage();
+
+    this.timerStart();
+  };
+
+  onTimerFilterPosts = () => {
     const {
       values: { current_value },
     } = this.props;
@@ -75,69 +77,80 @@ export default class PostsList extends React.PureComponent {
     });
   };
 
-  continueShowPosts = () => {};
-
-  showPosts = () => {
-    this.filterPosts();
-
+  timerClearStorage = () => {
     this.setState(prevState => ({
       values: {
         ...prevState.values,
         counter: 0,
       },
-      showPosts: [],
+      showSearchPosts: [],
     }));
+  };
 
-    const onTimerTick = () => {
-      this.setState(prevState => ({
-        values: {
-          ...prevState.values,
-          counter: prevState.values.counter + 1,
-        },
-        showPosts: [
-          ...prevState.showPosts,
-          this.state.sortedPosts[prevState.values.counter],
-        ],
-      }));
-    };
-
+  timerStart = () => {
     const interval = setInterval(() => {
-      if (!this.props.values.startRefreshing) {
-        return clearInterval(interval);
-      }
+      this.timerStop(interval);
 
-      if (this.state.values.counter === this.state.sortedPosts.length) {
-        return clearInterval(interval);
-      }
-
-      if (this.props.values.current_value === 0) {
-        return clearInterval(interval);
-      }
-
-      onTimerTick();
+      this.timerStartCountAndShowPosts();
     }, 1000);
+  };
+
+  timerContinue = () => {};
+
+  timerStop = interval => {
+    if (!this.props.values.startRefreshing) {
+      console.log(
+        'click stop startRefreshing',
+        !this.props.values.startRefreshing
+      );
+      return clearInterval(interval);
+    }
+
+    if (this.state.values.counter === this.state.sortedPosts.length - 1) {
+      console.log('end');
+      return clearInterval(interval);
+    }
+
+    if (this.props.values.current_value === 0) {
+      console.log('000');
+      return clearInterval(interval);
+    }
+  };
+
+  timerStartCountAndShowPosts = () => {
+    this.setState(prevState => ({
+      values: {
+        ...prevState.values,
+        counter: prevState.values.counter + 1,
+      },
+      showSearchPosts: [
+        ...prevState.showSearchPosts,
+        this.state.sortedPosts[prevState.values.counter],
+      ],
+    }));
   };
 
   renderingPostsList(posts) {
     if (posts[0] === false) {
-      console.log('oops');
       return <p>Sorry, not found</p>;
     }
 
-    return posts.map(({ data }) => {
-      return (
-        <Row className="mt-3" key={data.created_utc}>
-          <Col sm={4} md={3} key={data.created_utc}>
-            <UICard
-              thumbnail={data.thumbnail}
-              title={data.title}
-              num_comments={data.num_comments}
-              permalink={data.permalink}
-            />
-          </Col>
-        </Row>
-      );
-    });
+    return (
+      <Row className="mt-3">
+        {posts.map(({ data }) => {
+          return (
+            <Col sm={4} md={3} key={data.created_utc}>
+              <UICard
+                thumbnail={data.thumbnail}
+                title={data.title}
+                num_comments={data.num_comments}
+                permalink={data.permalink}
+              />
+            </Col>
+          );
+        })}
+      </Row>
+    );
   }
 
   componentDidMount() {
@@ -147,20 +160,32 @@ export default class PostsList extends React.PureComponent {
   componentDidUpdate(prevProps) {
     const { values } = this.props;
 
-    if (!_.isEqual(values.current_value, prevProps.values.current_value)) {
-      this.showPosts();
+    if (values.current_value !== prevProps.values.current_value) {
+      this.setState(prevState => ({
+        values: {
+          ...prevState.values,
+          current_value: this.props.values.current_value,
+        },
+      }));
+
+      this.timer();
     }
   }
 
   render() {
-    const { showPosts, initialPosts } = this.state;
+    const { showSearchPosts, initialPosts } = this.state;
     const { values } = this.props;
 
     return (
       <React.Fragment>
-        {this.renderingPostsList(showPosts)}
+        {this.renderingPostsList(showSearchPosts)}
 
-        {values.current_value === 0 && this.renderingPostsList(initialPosts)}
+        {initialPosts.length > 0 && !values.current_value && (
+          <React.Fragment>
+            <p>All Posts</p>
+            {this.renderingPostsList(initialPosts)}
+          </React.Fragment>
+        )}
       </React.Fragment>
     );
   }
